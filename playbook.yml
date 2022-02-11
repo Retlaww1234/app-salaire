@@ -1,0 +1,58 @@
+- hosts: web
+
+  tasks:
+    - name: install mariadb-server
+      yum:
+        name: mariadb-server
+        state: latest
+
+    - name: install httpd
+      yum:
+        name:
+        - httpd
+        - firewalld
+        state: present
+
+    - name: Apache to listen on 8080
+      lineinfile:
+        path: /etc/httpd/conf/httpd.conf
+        regexp: Listen 80
+        line: Listen 8080
+
+    - name: Allow 8080 port
+      firewalld:
+        port: 8080/tcp
+        permanent: yes
+        state: enabled
+
+    - name: Start Apache
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+
+    - name: start mariadb
+      service:
+        name: mariadb
+        state: started
+        enabled: yes
+
+    - name: Start Firewalld
+      service:
+        name: firewalld
+        state: started
+        enabled: yes
+
+    - name: Disable SELinux
+      selinux:
+        state: disabled
+
+    - name: Restart Firewalld
+      service:
+        name: firewalld
+        state: restarted
+
+    - name: Restart Apache
+      service:
+        name: httpd
+        state: restarted
